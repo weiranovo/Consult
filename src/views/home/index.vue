@@ -5,10 +5,15 @@ import knowledgeList from '@/views/home/components/knowledgeList.vue'
 //@ts-ignore
 import FollowDoctor from '@/views/home/components/FollowDoctor.vue'
 import type {KnowledgeType} from '@/types/consult'
+import { useStore } from "vuex";
+import { ConsultType } from '@/enums'
 const active = ref<KnowledgeType>('like')
+const store = useStore()
 </script>
 
 <template>
+  <!-- {{ store.state.consult.type }} -->
+  <!-- <button @click="store.commit('consult/setType',ConsultType.Fast)">test</button> -->
   <div class="home-page">
     <!-- 头部 -->
     <div class="home-header">
@@ -30,7 +35,7 @@ const active = ref<KnowledgeType>('like')
           </router-link>
         </van-col>
         <van-col span="8">
-          <router-link to="/consult/fast" class="nav">
+          <router-link to="/consult/fast" class="nav" @click="store.commit('consult/setType',ConsultType.Fast)">
             <cp-icon name="home-graphic"></cp-icon>
             <p class="title">极速问诊</p>
             <p class="desc">20s医生极速回复</p>

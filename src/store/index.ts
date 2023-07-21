@@ -1,11 +1,13 @@
 import { createStore } from "vuex";
 import user from './modules/user';
+import consult from './modules/consult';
 import getters from '@/store/getters';
-const PERSIST_PATHS = ['user.token']
+const PERSIST_PATHS = ['user.token','consult']
 import createPersistedstate  from 'vuex-persistedstate'
 const store:any = createStore({
     modules: {
         user,
+        consult
     },
     getters,
     plugins:[

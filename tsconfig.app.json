@@ -4,7 +4,7 @@
   "exclude": ["src/**/__tests__/*"],
   "compilerOptions": {
     "suppressImplicitAnyIndexErrors": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Node",
     "composite": true,
     "baseUrl": ".",
     "paths": {

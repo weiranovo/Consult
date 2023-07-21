@@ -1,4 +1,5 @@
-import { ConsultType, IllnessTime } from '@/enums'
+import { ConsultType, IllnessTime,OrderType } from '@/enums'
+import type { Patient } from "./user";
 // props类型 recommend推荐，fatReduction减脂，food健康饮食，like关注医生页面文章
 export type KnowledgeType = 'like' | 'recommend' | 'fatReduction' | 'food'
 
@@ -94,13 +95,8 @@ export type DoctorPage = {
   rows: DoctorList
 }
 
-
 // 关注的类型，医生|文章|百科话题|疾病
 export type FollowType = 'doc' | 'knowledge' | 'topic' | 'disease'
-
-
-
-
 
 // 图片列表
 export type Image = {
@@ -136,3 +132,88 @@ export type Consult = {
 // 问诊记录-全部可选
 export type PartialConsult = Partial<Consult>
 // Required 转换为全部必须   Partial 转换问全部可选  两个内置的泛型类型
+
+
+
+//子科室
+export type SubDep = {
+  id:string,
+  name:string
+}
+
+//一级科室
+export type TopDep  = SubDep & {
+  child:SubDep[]
+}
+
+export type ConsultIllness = Pick<
+  PartialConsult,
+  'illnessDesc' | 'illnessTime' | 'consultFlag' | 'pictures'
+>
+
+// 问诊订单预支付传参
+export type ConsultOrderPreParams = Pick<PartialConsult, 'type' | 'illnessType'>
+
+// 问诊订单预支付信息
+export type ConsultOrderPreData = {
+  /** 积分抵扣 */
+  pointDeduction: number
+  /** 优惠券抵扣 */
+  couponDeduction: number
+  /** 优惠券ID */
+  couponId: string
+  /** 需付款 */
+  payment: number
+  /** 实付款 */
+  actualPayment: number
+}
+
+
+// 问诊订单单项信息
+export type ConsultOrderItem = Consult & {
+  /** 创建时间 */
+  createTime: string
+  /** 医生信息 */
+  docInfo?: Doctor
+  /** 患者信息 */
+  patientInfo: Patient
+  /** 订单编号 */
+  orderNo: string
+  /** 订单状态 */
+  status: OrderType
+  /** 状态文字 */
+  statusValue: string
+  /** 类型问诊文字 */
+  typeValue: string
+  /** 倒计时时间 */
+  countdown: number
+  /** 处方ID */
+  prescriptionId?: string
+  /** 评价ID */
+  evaluateId: number
+  /** 应付款 */
+  payment: number
+  /** 优惠券抵扣 */
+  couponDeduction: number
+  /** 积分抵扣 */
+  pointDeduction: number
+  /** 实付款 */
+  actualPayment: number
+}
+
+
+export type ConsultOrderListParams = PageParams & {
+  /** 问诊记录类型 */
+  type: ConsultType
+}
+
+
+
+export type ConsultOrderPage = {
+  pageTotal: number
+  total: number
+  rows: ConsultOrderItem[]
+}
+
+
+

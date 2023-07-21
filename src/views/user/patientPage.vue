@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { getPatientList, addPatient, editPatient, delPatient } from "@/api/user";
 import type { PatientList, Patient } from '@/types/user'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
 import cpNavBar from "@/components/cp-nav-bar.vue";
 import IDValidator from "id-validator";
 import { idCardRules } from '@/utils/rules'
-import { showToast, showSuccessToast,showConfirmDialog } from "vant";
+import { showToast, showSuccessToast, showConfirmDialog } from "vant";
+import { useRoute,useRouter } from 'vue-router'
+import { useStore } from 'vuex'
+const router = useRouter()
+const store = useStore()
+const route = useRoute()
+const isChange = computed(() => route.query.isChange === '1')
 //验证身份证
 const ValidatorId = new IDValidator();
 
@@ -34,6 +40,12 @@ const showEditDialog = (item: Patient) => {
 const loadList = async () => {
     const res = await getPatientList()
     list.value = res.data
+    // 设置默认选中的ID，当你是选择患者的时候，且有患者信息的时候
+    if (isChange.value && list.value.length) {
+        const defPatient = list.value.find((item) => item.defaultFlag === 1)
+        if (defPatient) patientId.value = defPatient.id
+        else patientId.value = list.value[0].id
+    }
 }
 //选择框数据
 const RadioOption = [
@@ -80,6 +92,19 @@ const remove = async () => {
         showSuccessToast('删除成功')
     }
 }
+//点击选择效果
+const patientId = ref<string>()
+const selectedPatient = (item: Patient) => {
+    if (isChange.value) {
+        patientId.value = item.id
+    }
+}
+//下一步
+const next = async () => {
+  if (!patientId.value) return showToast('请选就诊择患者')
+  store.commit('consult/setPatient',patientId.value)
+  router.push('/consult/pay')
+}
 onMounted(() => {
     loadList()
 })
@@ -87,9 +112,15 @@ onMounted(() => {
 
 <template>
     <div class="patient-page">
-        <cpNavBar title="家庭档案"></cpNavBar>
+        <cpNavBar :title="isChange ? '选择患者' : '家庭档案'"></cpNavBar>
+        <!-- 头部提示 -->
+        <div class="patient-change" v-if="isChange">
+            <h3>请选择患者信息</h3>
+            <p>以便医生给出更准确的治疗，信息仅医生可见</p>
+        </div>
         <div class="patient-list">
-            <div class="patient-item" v-for="item in list" :key="item.id">
+            <div class="patient-item" v-for="item in list" :key="item.id" @click="selectedPatient(item)"
+                :class="{ selected: patientId === item.id }">
                 <div class="info">
                     <span class="name">{{ item.name }}</span>
                     <span class="id">{{ item.idCard.replace(/^(.{6})(?:\d+)(.{4})$/, '\$1********\$2') }}</span>
@@ -104,6 +135,10 @@ onMounted(() => {
                 <p>添加患者</p>
             </div>
             <div class="patient-tip" v-if="list.length < 6">最多可添加 6 人</div>
+        </div>
+        <!-- 底部按钮 -->
+        <div class="patient-next" v-if="isChange">
+            <van-button type="primary" round block @click="next">下一步</van-button>
         </div>
     </div>
 
@@ -245,4 +280,27 @@ onMounted(() => {
         background-color: var(--cp-bg);
     }
 }
-</style>
+
+.patient-change {
+    padding: 15px;
+
+    >h3 {
+        font-weight: normal;
+        margin-bottom: 5px;
+    }
+
+    >p {
+        color: var(--cp-text3);
+    }
+}
+
+.patient-next {
+    padding: 15px;
+    background-color: #fff;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 80px;
+    box-sizing: border-box;
+}</style>
